@@ -7,6 +7,11 @@
 
 ## Step1
 
+### 결과물
+
+- [소스코드](./step1)
+- [데모](https://junilhwang.github.io/black-coffee-study/step1/index.html)
+
 ### 미션 수행 기록
 
 - 개인 미션
