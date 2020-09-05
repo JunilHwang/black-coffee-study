@@ -1,7 +1,7 @@
 import { debounceOneFrame } from "../utils/index.js";
 
 export const Component = class {
-  $state = {}; $target; $props; $render;
+  $state = {}; $target; $props;
 
   constructor(target, state = {}, props = {}) {
     this.$target = target;
