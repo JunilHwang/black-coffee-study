@@ -2,7 +2,6 @@ import { Component } from "../core/Component.js";
 import {PUT_ITEM, PUT_PRIORITY_ITEM, REMOVE_ITEM, SET_EDITING, todoStore, TOGGLE_ITEM} from "../store/todoStore.js";
 import LoadingTypes from "../constants/LoadingTypes.js";
 import { userStore } from "../store/userStore.js";
-import FilterTypes from "../constants/FilterTypes.js";
 
 const loadingArray = [ ...Array(5).keys() ];
 
@@ -21,7 +20,7 @@ const progressTemplate = `
 `;
 
 const getItemClass = (completed, editing) => editing   ? ' class="editing"'   :
-                                             completed ? ' class="completed"' : '';
+  completed ? ' class="completed"' : '';
 
 export const TodoList = class extends Component {
 
@@ -64,21 +63,19 @@ export const TodoList = class extends Component {
   }
 
   render () {
-    const { loading, todoItems, editingIndex, filterType } = todoStore.$state;
+    const { loading, editingIndex } = todoStore.$state;
+    const items = todoStore.$getters.filteredItems;
     if (loading === LoadingTypes.INIT) {
       return loadingArray.map(() => progressTemplate).join('')
     }
-    return todoItems.map(({ _id, contents, isCompleted, priority, isLoading = false }, index) =>
-      isLoading ? progressTemplate :
-      (filterType === FilterTypes.ALL) ||
-      (isCompleted && filterType === FilterTypes.COMPLETED) ||
-      (!isCompleted && filterType === FilterTypes.ACTIVE) ? `
+    return items.map(([ index, { _id, contents, isCompleted, priority, isLoading = false } ]) =>
+      isLoading ? progressTemplate : `
       <li ${getItemClass(isCompleted, editingIndex === index)} data-index="${index}">
         <div class="view">
           <input class="toggle" type="checkbox" ${isCompleted ? 'checked' : ''} />
           <label class="label">
             ${ priority === 1 ? `<span class="chip primary">1순위</span>` :
-               priority === 2 ? `<span class="chip secondary">2순위</span>` : `
+        priority === 2 ? `<span class="chip secondary">2순위</span>` : `
               <select class="chip select">
                 <option value="0" selected>순위</option>
                 <option value="1">1순위</option>
@@ -90,7 +87,7 @@ export const TodoList = class extends Component {
         </div>
         <input class="edit" value="${contents}" />
       </li>
-    ` : '').join('');
+    `).join('');
   }
 
   setEvent (componentTarget) {

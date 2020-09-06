@@ -14,12 +14,7 @@ const filterButtons = [
 export const TodoFooter = class extends Component {
 
   get #itemCount () {
-    const { todoItems, filterType } = todoStore.$state;
-    return todoItems.filter(({ isCompleted }) =>
-      filterType === FilterTypes.ALL ||
-      (isCompleted && filterType === FilterTypes.COMPLETED) ||
-      (!isCompleted && filterType === FilterTypes.ACTIVE)
-    ).length;
+    return todoStore.$getters.filteredItems.length;
   }
 
   get #filterType () {
@@ -28,15 +23,6 @@ export const TodoFooter = class extends Component {
 
   get #user () {
     return userStore.$getters.selectedUserName;
-  }
-
-  async #removeAllItem () {
-    todoStore.commit(SET_LOADING_TYPE, LoadingTypes.INIT);
-    await Promise.all([
-      todoStore.dispatch(REMOVE_ALL_ITEM, this.#user),
-      lazyFrame()
-    ]);
-    todoStore.commit(SET_LOADING_TYPE, LoadingTypes.LOADED);
   }
 
   render () {
@@ -64,7 +50,7 @@ export const TodoFooter = class extends Component {
       if (contain('filter-button'))
         todoStore.commit(SET_FILTER_TYPE, target.dataset.filterType);
       if (contain('clear-completed'))
-        this.#removeAllItem();
+        todoStore.dispatch(REMOVE_ALL_ITEM, this.#user);
     })
   }
 }
