@@ -1,20 +1,18 @@
 export const Store = class {
 
   $state;
+  $getters;
   #mutations;
   #actions;
-  $getters;
   #observes = new Set();
 
-  constructor({ state, mutations, getters, actions }) {
+  constructor({ state, getters = {}, mutations = {}, actions = {} }) {
     this.$state = state;
     this.$getters = Object.entries(getters)
-                          .reduce((getters, [key, getter]) => {
+                          .reduce((getters, [key, getter]) => (
                             Object.defineProperty(getters, key, {
                               get: () => getter(this.$state)
-                            })
-                            return getters;
-                          }, {});
+                            }), getters), {});
     this.#mutations = mutations;
     this.#actions = actions;
   }
@@ -26,19 +24,19 @@ export const Store = class {
   }
 
   dispatch (key, payload) {
-    return this.#actions[key]({
+    this.#actions[key]({
       commit: (key, payload) => this.commit(key, payload),
       dispatch: (key, payload) => this.dispatch(key, payload),
       state: { ...this.$state },
     }, payload);
   }
 
-  addObserver (component) {
-    this.#observes.add(component);
+  addObserve (...components) {
+    components.forEach(component => this.#observes.add(component));
   }
 
   #setState (newState) {
     this.$state = { ...newState };
-    this.#observes.forEach(observer => observer.render());
+    this.#observes.forEach(observer => observer.validate() && observer.$render());
   }
 }
