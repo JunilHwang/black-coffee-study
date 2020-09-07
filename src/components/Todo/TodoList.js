@@ -1,151 +1,105 @@
-import { Component } from "../../core/Component.js";
-import {todoOfTeamStore} from "../../store/todoOfTeamStore.js";
+import {Component} from "../../core/Component.js";
+import {DELETE_ITEM, SET_EDITING, todoOfTeamStore, TOGGLE_ITEM, UPDATE_ITEM} from "../../store/todoOfTeamStore.js";
+import {TodoListFooter} from "./TodoListFooter.js";
+import {TodoItemAppender} from "./TodoItemAppender.js";
+import PriorityTypes from "../../constants/PriorityTypes.js";
+
+const priorityChip = {
+  [PriorityTypes.PRIMARY]: 'primary',
+  [PriorityTypes.SECONDARY]: 'secondary',
+}
 
 export const TodoList = class extends Component {
 
   get #member () {
-    return todoOfTeamStore.$state.members.find(v => v._id === this.$props.id);
+    return todoOfTeamStore.$state.members[this.$props.id];
+  }
+
+  get #filteredItems () {
+    return todoOfTeamStore.$getters.membersByFilteredTodoList[this.$props.id];
+  }
+
+  isEditingOf (id) {
+    return todoOfTeamStore.$state.editing === id;
   }
 
   render () {
-    console.log(this.#member);
     return `
       <h2>
-        <span><strong>eastjun</strong>'s Todo List</span>
+        <span><strong>${this.#member.name}</strong>'s Todo List</span>
       </h2>
       <div class="todoapp">
-        <section class="input-container">
-          <input class="new-todo" placeholder="할 일을 입력해주세요." autofocus />
-        </section>
+        <section id="todo-item-appender" class="input-container"></section>
         <section class="main">
           <ul class="todo-list">
-            <li class="todo-list-item">
-              <div class="view">
-                <input class="toggle" type="checkbox" />
-                <label class="label">
-                  <div class="chip-container">
-                    <select class="chip select">
-                      <option value="0" selected>순위</option>
-                      <option value="1">1순위</option>
-                      <option value="2">2순위</option>
-                    </select>
-                  </div>
-                  해야할 아이템
-                </label>
-                <button class="destroy"></button>
-              </div>
-              <input class="edit" value="완료된 타이틀" />
-            </li>
-            <li class="todo-list-item">
-              <div class="view">
-                <input class="toggle" type="checkbox" />
-                <label class="label">
-                  <div class="chip-container">
-                    <select class="chip select">
-                      <option value="0" selected>순위</option>
-                      <option value="1">1순위</option>
-                      <option value="2">2순위</option>
-                    </select>
-                  </div>
-                  해야할 아이템
-                </label>
-                <button class="destroy"></button>
-              </div>
-              <input class="edit" value="완료된 타이틀" />
-            </li>
-            <li class="todo-list-item">
-              <div class="view">
-                <input class="toggle" type="checkbox" />
-                <label class="label">
-                  <div class="chip-container">
-                    <span class="chip primary">1순위</span>
-                    <select class="chip select hidden">
-                      <option value="0" selected>순위</option>
-                      <option value="1">1순위</option>
-                      <option value="2">2순위</option>
-                    </select>
-                  </div>
-                  <span class="todo-item-text">해야할 아이템</span>
-                </label>
-                <button class="delete"></button>
-              </div>
-              <input class="edit" value="완료된 타이틀" />
-            </li>
-            <li class="todo-list-item">
-              <div class="view">
-                <input class="toggle" type="checkbox" />
-                <label class="label">
-                  <div class="chip-container">
-                    <span class="chip secondary">1순위</span>
-                    <select class="chip select hidden">
-                      <option value="0" selected>순위</option>
-                      <option value="1">1순위</option>
-                      <option value="2">2순위</option>
-                    </select>
-                  </div>
-                  해야할 아이템
-                </label>
-                <button class="destroy"></button>
-              </div>
-              <input class="edit" value="완료된 타이틀" />
-            </li>
-            <li class="todo-list-item completed">
-              <div class="view">
-                <input class="toggle" type="checkbox" checked />
-                <label class="label">
-                  <div class="chip-container">
-                    <span class="chip primary">1순위</span>
-                    <select class="chip select hidden">
-                      <option value="0" selected>순위</option>
-                      <option value="1">1순위</option>
-                      <option value="2">2순위</option>
-                    </select>
-                  </div>
-                  완료된 아이템
-                </label>
-                <button class="destroy"></button>
-              </div>
-              <input class="edit" value="완료된 타이틀" />
-            </li>
-            <li class="todo-list-item editing">
-              <div class="view">
-                <input class="toggle" type="checkbox" checked />
-                <label class="label">
-                  <div class="chip-container">
-                    <span class="chip primary">1순위</span>
-                    <select class="chip select hidden">
-                      <option value="0" selected>순위</option>
-                      <option value="1">1순위</option>
-                      <option value="2">2순위</option>
-                    </select>
-                  </div>
-                  수정중인 아이템
-                </label>
-                <button class="destroy"></button>
-              </div>
-              <input class="edit" value="수정중인 타이틀" />
-            </li>
+            ${ this.#filteredItems.map(({ _id, isCompleted, priority, contents }) => `
+              <li class="todo-list-item ${ isCompleted ? 'completed' : '' } ${ this.isEditingOf(_id) ? 'editing' : '' }" data-id="${_id}">
+                <div class="view">
+                  <input class="toggle" type="checkbox" data-ref="toggle" ${ isCompleted ? 'checked' : '' } />
+                  <label class="label" data-ref="editing">
+                    <div class="chip-container">
+                      ${priority === 0 ? `
+                        <select class="chip select">
+                          <option value="0" selected>순위</option>
+                          <option value="1">1순위</option>
+                          <option value="2">2순위</option>
+                        </select>` : `
+                        <span class="chip ${priorityChip[priority]}">${priority}순위</span>                        
+                      `}
+                    </div>
+                    ${contents}
+                  </label>
+                  <button class="destroy" data-ref="delete"></button>
+                </div>
+                <input class="edit" value="${contents}" data-ref="edited" />
+              </li>
+            `).join('') }
           </ul>
         </section>
-        <div class="count-container">
-          <span class="todo-count">총 <strong>0</strong> 개</span>
-          <ul class="filters">
-            <li>
-              <a href="#all" class="selected">전체보기</a>
-            </li>
-            <li>
-              <a href="#priority">우선 순위</a>
-            </li>
-            <li>
-              <a href="#active">해야할 일</a>
-            </li>
-            <li>
-              <a href="#completed">완료한 일</a>
-            </li>
-          </ul>
-          <button class="clear-completed">모두 삭제</button>
-        </div>
+        <div id="todo-list-footer" class="count-container"></div>
       </div>
     `;
+  }
+
+
+  componentDidMount () {
+    const $todoListFooter = this.$target.querySelector('#todo-list-footer');
+    const $todoItemAppender = this.$target.querySelector('#todo-item-appender');
+    new TodoListFooter($todoListFooter, { id: this.$props.id });
+    new TodoItemAppender($todoItemAppender, { id: this.$props.id });
+  }
+
+  setEvent () {
+    const getId = target => target.closest('[data-id]').dataset.id;
+    this.addEvent('toggle', 'change', ({ target }) => {
+      this.#toggle(getId(target));
+    });
+    this.addEvent('delete', 'click', ({ target }) => {
+      this.#remove(getId(target));
+    });
+    this.addEvent('editing', 'dblclick', ({ target }) => {
+      this.#editing(getId(target));
+    });
+    this.addEvent('edited', 'keypress', ({ target, key }) => {
+      if (key !== 'Enter') return;
+      this.#edited(getId(target), target.value);
+    });
+  }
+
+  #toggle (itemId) {
+    todoOfTeamStore.dispatch(TOGGLE_ITEM, { memberId: this.$props.id, itemId });
+  }
+
+  #remove (itemId) {
+    todoOfTeamStore.dispatch(DELETE_ITEM, { memberId: this.$props.id, itemId });
+  }
+
+  #editing (itemId) {
+    todoOfTeamStore.commit(SET_EDITING, itemId);
+  }
+
+  #edited (itemId, contents) {
+    todoOfTeamStore.dispatch(UPDATE_ITEM, { memberId: this.$props.id, itemId, contents });
+    todoOfTeamStore.commit(SET_EDITING, null);
   }
 }
