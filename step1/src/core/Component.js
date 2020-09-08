@@ -1,4 +1,4 @@
-import { debounceOneFrame } from "../utils/index.js";
+import {addEventBubblingListener, debounceOneFrame} from "../utils/index.js";
 
 export const Component = class {
   $state = {}; $target; $props;
@@ -19,4 +19,7 @@ export const Component = class {
   }
   render () { return '' }
   setEvent (componentTarget) {  }
+  addEvent (eventType, ref, callback) {
+    addEventBubblingListener(eventType, this.$target, `[data-ref="${ref}"]`, callback);
+  }
 }
