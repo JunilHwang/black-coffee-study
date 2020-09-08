@@ -8,7 +8,7 @@ export const debounceOneFrame = callback => {
 };
 
 export const addEventBubblingListener = (eventType, parent, childSelector, callback) => {
-  const isChildrenOf = target => [ ...parent.closest(childSelector) ].includes(target) ||
+  const isChildrenOf = target => [ ...parent.querySelectorAll(childSelector) ].includes(target) ||
                                  target.closest(childSelector)
   parent.addEventListener(eventType, event => {
     if (!isChildrenOf(event.target)) return;
