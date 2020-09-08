@@ -14,7 +14,7 @@ export const ToDoFilter = class extends Component {
     const { filterType } = toDoStore.$state;
     return filterButtons.map(({ type, text }, index) => `
       <li>
-        <a class="filter-button ${type} ${type === filterType ? 'selected' : ''}"
+        <a data-ref="filter" class="filter-button ${type} ${type === filterType ? 'selected' : ''}"
            href="#"
            data-filter-type="${type}">
           ${text}
@@ -23,13 +23,10 @@ export const ToDoFilter = class extends Component {
     `).join('');
   }
 
-  setEvent (componentTarget) {
-    componentTarget.addEventListener('click', e => {
+  setEvent () {
+    this.addEvent('click', 'filter', e => {
       e.preventDefault();
-      const { target } = e;
-      if (target.classList.contains('filter-button')) {
-        toDoStore.commit(SET_FILTER_TYPE, target.dataset.filterType);
-      }
-    })
+      toDoStore.commit(SET_FILTER_TYPE, e.target.dataset.filterType);
+    });
   }
 }

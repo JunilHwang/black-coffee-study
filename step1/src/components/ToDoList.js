@@ -48,37 +48,31 @@ export const ToDoList = class extends Component{
   }
 
   render () {
-    const { editingIndex } = toDoStore.$state;
     const filteredItems = toDoStore.$getters.filteredItems;
     return filteredItems.map(([ index, { title, completed, editing } ]) => `
       <li ${ getToDoItemClass(completed, editing) } data-index="${index}">
         <div class="view">
           <input class="toggle"
+                 data-ref="toggle"
                  type="checkbox"
                  ${completed ? 'checked' : '' } />
-          <label class="label">${title}</label>
-          <button class="destroy"></button>
+          <label class="label" data-ref="contents">${title}</label>
+          <button class="destroy" data-ref="delete"></button>
         </div>
-        <input class="edit" value="${title}" />
+        <input class="edit" data-ref="editor" value="${title}" />
       </li>
     `).join('');
-    if (editingIndex !== -1) {
-      this.$target.querySelector(`.edit[data-index="${editingIndex}"]`).focus();
-    }
   }
 
-  setEvent ($target) {
-    $target.addEventListener('change', ({ target }) => {
-      if (target.classList.contains('toggle')) this.#toggle(target)
-    })
-    $target.addEventListener('click', ({ target }) => {
-      if (target.classList.contains('destroy')) this.#remove(target)
-    })
-    $target.addEventListener('dblclick', ({ target }) => {
-      if (target.classList.contains('label')) this.#editing(target)
-    })
-    $target.addEventListener('keydown', ({ target, key }) => {
-      if (target.classList.contains('edit')) this.#edited(target, key)
-    })
+  componentDidUpdate () {
+    const { editingIndex } = toDoStore.$state;
+    this.$target.querySelector(`[data-index="${editingIndex}"] .edit`)?.focus();
+  }
+
+  setEvent () {
+    this.addEvent('change', 'toggle', ({ target }) => this.#toggle(target))
+        .addEvent('click', 'delete', ({ target }) => this.#remove(target))
+        .addEvent('dblclick', 'contents', ({ target }) => this.#editing(target))
+        .addEvent('keydown', 'editor', ({ target, key }) => this.#edited(target, key))
   }
 }
