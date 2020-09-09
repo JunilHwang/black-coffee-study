@@ -13,10 +13,10 @@ export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, r
     constructor() {
       super();
 
-      this.$props = propsKeys.reduce((obj, key) => {
+      const $props = propsKeys.reduce((obj, key) => {
         Object.defineProperty(obj, key, {
           get: () => this.getAttribute(key),
-          set: value => this.setAttribute(key, value)
+          set: value => { this.setAttribute(key, value); }
         })
         return obj;
       }, {});
@@ -24,10 +24,12 @@ export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, r
       Object.defineProperty(this, '$props', {
         set: props => {
           for (const [key, value] of Object.entries(props)) {
-            this.$props[key] = value;
+            $props[key] = value;
           }
         }
       })
+
+      this.$props = $props;
 
       setEvent(this);
     }

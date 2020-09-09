@@ -1,11 +1,10 @@
 import {createComponent, defineComponent} from "../core/Component.js";
+import {UserName} from "../components/User/UserName.js";
 
-const UserContainer = 'user-container';
+const componentName = 'user-container';
 
-defineComponent({ name: UserContainer }, () => `
-  <h1 id="user-title" data-username="eastjun">
-    <span><strong>eastjun</strong>'s Todo List</span>
-  </h1>
+defineComponent({ name: componentName, propsKeys: [ 'name' ] }, () => `
+  ${UserName({ name: 'eastjun' }).outerHTML}
   <section>
     <div id="user-list">
       <button class="ripple active">eastjun</button>
@@ -18,4 +17,8 @@ defineComponent({ name: UserContainer }, () => `
   </section>
 `);
 
-export const userContainer = createComponent(UserContainer)
+export const UserContainer = createComponent(componentName, {
+  props: {
+    name: 'eastjun'
+  }
+});

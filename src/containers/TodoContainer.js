@@ -1,8 +1,8 @@
 import {defineComponent, createComponent} from "../core/Component.js";
 
-const TodoContainer = 'todo-container';
+const componentName = 'todo-container';
 
-defineComponent({ name: TodoContainer }, () => `
+defineComponent({ name: componentName }, () => `
   <section class="todoapp">
     <section class="input-container">
       <input class="new-todo" placeholder="할 일을 입력해주세요." autofocus />
@@ -96,4 +96,4 @@ defineComponent({ name: TodoContainer }, () => `
   </section>
 `);
 
-export const todoContainer = createComponent(TodoContainer);
+export const TodoContainer = createComponent(componentName);
