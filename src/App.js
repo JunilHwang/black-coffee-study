@@ -1,7 +1,7 @@
-import './containers/UserContainer.js';
-import './containers/TodoContainer.js';
+import {userContainer} from "./containers/UserContainer.js";
+import {todoContainer} from "./containers/TodoContainer.js";
 
 document.querySelector('#app').innerHTML = `
-  <user-container></user-container>
-  <todo-container></todo-container>
+  ${userContainer.outerHTML}
+  ${todoContainer.outerHTML}
 `;

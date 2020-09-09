@@ -1,6 +1,8 @@
-import { Component } from "../core/Component.js";
+import {createComponent, defineComponent} from "../core/Component.js";
 
-export const UserContainer = Component({ name: 'user-container' }, () => `
+const UserContainer = 'user-container';
+
+defineComponent({ name: UserContainer }, () => `
   <h1 id="user-title" data-username="eastjun">
     <span><strong>eastjun</strong>'s Todo List</span>
   </h1>
@@ -15,3 +17,5 @@ export const UserContainer = Component({ name: 'user-container' }, () => `
     </div>
   </section>
 `);
+
+export const userContainer = createComponent(UserContainer)
