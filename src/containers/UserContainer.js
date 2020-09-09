@@ -1,19 +1,17 @@
 import {createComponent, defineComponent} from "../core/Component.js";
 import '../components/User/UserName.js';
-import '../components/User/UserItem.js';
+import {UserList} from "../components/User/UserList.js";
 
 const componentName = 'user-container';
 
-defineComponent({ name: componentName }, ({ name, users }) => `
+
+const setEvent = $target => {
+  $target.addEvent('click', )
+}
+
+defineComponent({ name: componentName, setEvent }, ({ name, users }) => `
   <user-name name="${name}"></user-name>
-  <section>
-    <div id="user-list">
-      ${users.map(({ name, isActive }) => `
-        <user-item name="${name}" isActive="${isActive}"></user-item>
-      `).join('')}
-      <button class="ripple user-create-button">+ 유저 생성</button>
-    </div>
-  </section>
+  ${UserList({ users }).outerHTML}
 `);
 
 export const UserContainer = createComponent(componentName, {
