@@ -1,23 +1,22 @@
-export const Component = ({ name, propsKeys, state = {}, setEvent = () => {} }, render) => {
+export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, render) => {
 
-  const CustomElement = class extends HTMLElement {
+  customElements.define(name, class extends HTMLElement {
 
     $props; $state;
 
     constructor() {
       super();
 
-      const shadow = this.attachShadow({ mode: 'open' });
       this.$state = state;
       this.$props = propsKeys.reduce((obj, key) => {
         Object.defineProperty(obj, key, {
-          get: () => { return this.getAttribute(key); },
-          set: value => { this.setAttribute(key, value); }
+          get: () => this.getAttribute(key),
+          set: value => this.setAttribute(key, value)
         })
         return obj;
       }, {});
 
-      shadow.innerHTML = render({
+      this.innerHTML = render({
         state: this.$state,
         props: this.$props,
       });
@@ -30,15 +29,18 @@ export const Component = ({ name, propsKeys, state = {}, setEvent = () => {} }, 
     }
 
     attributeChangedCallback() {
-      this.shadowRoot.innerHTML = render({
+      this.innerHTML = render({
         state: this.$state,
         props: this.$props,
       });
     }
 
-  }
+  });
 
-  customElements.define(name, CustomElement);
-
-  return CustomElement;
 }
+
+export const createComponent = () => {
+
+}
+
+export default { defineComponent, createComponent };
