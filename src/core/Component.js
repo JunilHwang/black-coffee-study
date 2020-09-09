@@ -8,28 +8,18 @@ export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, r
   }
   components[name] = class extends HTMLElement {
 
-    $props; $state;
+    #props; #state;
 
     constructor() {
       super();
 
-      const $props = propsKeys.reduce((obj, key) => {
+      this.#props = propsKeys.reduce((obj, key) => {
         Object.defineProperty(obj, key, {
           get: () => this.getAttribute(key),
           set: value => { this.setAttribute(key, value); }
         })
         return obj;
       }, {});
-
-      Object.defineProperty(this, '$props', {
-        set: props => {
-          for (const [key, value] of Object.entries(props)) {
-            $props[key] = value;
-          }
-        }
-      })
-
-      this.$props = $props;
 
       setEvent(this);
     }
@@ -48,19 +38,21 @@ export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, r
 
     #render () {
       this.innerHTML = render({
-        state: this.$state,
-        props: this.$props,
+        state: this.#state,
+        props: this.#props,
       });
     }
 
     init ({state, props}) {
-      this.$props = props;
-      this.$state = state;
+      for (const [key, value] of Object.entries(props)) {
+        this.#props[key] = value;
+      }
+      this.#state = state;
       return this;
     }
 
     setState (payload) {
-      this.$state = { ...this.$state, ...payload };
+      this.#state = { ...this.#state, ...payload };
       this.#render();
     }
 

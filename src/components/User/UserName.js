@@ -2,9 +2,9 @@ import {createComponent, defineComponent} from "../../core/Component.js";
 
 const componentName = 'user-name';
 
-defineComponent({ name: componentName, propsKeys: ['name'] }, ({ props }) => `
-  <h1 id="user-title" data-username="${props.name}">
-    <span><strong>${props.name}</strong>'s Todo List</span>
+defineComponent({ name: componentName, propsKeys: ['name'] }, ({ props: { name } }) => `
+  <h1 id="user-title" data-username="${name}">
+    <span><strong>${name}</strong>'s Todo List</span>
   </h1>
 `);
 
