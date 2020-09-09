@@ -2,10 +2,12 @@ const Component = (name, propsKeys, render) => {
 
   const CustomElement = class extends HTMLElement {
 
-    $props;
+    $props; #shadow;
 
     constructor() {
       super();
+
+      const shadow = this.attachShadow({ mode: 'open' });
 
       for (const key of propsKeys) {
         Object.defineProperty(this, key, {
@@ -23,7 +25,7 @@ const Component = (name, propsKeys, render) => {
         return obj;
       }, {});
 
-      this.innerHTML = render(this.$props);
+      shadow.innerHTML = render(this.$props);
     }
 
     static get observedAttributes() {
@@ -31,7 +33,7 @@ const Component = (name, propsKeys, render) => {
     }
 
     attributeChangedCallback() {
-      this.innerHTML = render(this.$props);
+      this.shadowRoot.innerHTML = render(this.$props);
     }
   }
 
