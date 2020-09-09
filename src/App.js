@@ -1,7 +1,7 @@
 import {userContainer} from "./containers/UserContainer.js";
 import {todoContainer} from "./containers/TodoContainer.js";
 
-document.querySelector('#app').innerHTML = `
-  ${userContainer.outerHTML}
-  ${todoContainer.outerHTML}
-`;
+const $app = document.querySelector('#app');
+
+$app.appendChild(userContainer);
+$app.appendChild(todoContainer);
