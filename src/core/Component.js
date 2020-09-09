@@ -1,22 +1,14 @@
-const Component = (name, propsKeys, render) => {
+export const Component = ({ name, propsKeys, state = {}, setEvent = () => {} }, render) => {
 
   const CustomElement = class extends HTMLElement {
 
-    $props; #shadow;
+    $props; $state;
 
     constructor() {
       super();
 
       const shadow = this.attachShadow({ mode: 'open' });
-
-      for (const key of propsKeys) {
-        Object.defineProperty(this, key, {
-          set: value => {
-            this.setAttribute(key, value);
-          }
-        })
-      }
-
+      this.$state = state;
       this.$props = propsKeys.reduce((obj, key) => {
         Object.defineProperty(obj, key, {
           get: () => { return this.getAttribute(key); },
@@ -25,7 +17,12 @@ const Component = (name, propsKeys, render) => {
         return obj;
       }, {});
 
-      shadow.innerHTML = render(this.$props);
+      shadow.innerHTML = render({
+        state: this.$state,
+        props: this.$props,
+      });
+
+      setEvent();
     }
 
     static get observedAttributes() {
@@ -33,21 +30,15 @@ const Component = (name, propsKeys, render) => {
     }
 
     attributeChangedCallback() {
-      this.shadowRoot.innerHTML = render(this.$props);
+      this.shadowRoot.innerHTML = render({
+        state: this.$state,
+        props: this.$props,
+      });
     }
+
   }
 
   customElements.define(name, CustomElement);
 
   return CustomElement;
 }
-
-Component('todo-item',['contents', 'key'], ({ key, contents }) => `
-  <p data-key="${key}">${contents}</p>
-`);
-
-document.querySelector('#app').innerHTML = `
-  <todo-item key="1" contents="test" />
-`
-
-const todoItem = document.querySelector('todo-item');
