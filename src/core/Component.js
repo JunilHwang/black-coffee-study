@@ -12,15 +12,10 @@ export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, r
 
     constructor() {
       super();
-
       this.#props = propsKeys.reduce((obj, key) => {
-        Object.defineProperty(obj, key, {
-          get: () => this.getAttribute(key),
-          set: value => { this.setAttribute(key, value); }
-        })
+        obj[key] = this.getAttribute(key);
         return obj;
       }, {});
-
       setEvent(this);
     }
 
@@ -38,15 +33,12 @@ export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, r
 
     #render () {
       this.innerHTML = render({
-        state: this.#state,
-        props: this.#props,
+        ...this.#state,
+        ...this.#props
       });
     }
 
-    init ({state, props}) {
-      for (const [key, value] of Object.entries(props)) {
-        this.#props[key] = value;
-      }
+    init (state) {
       this.#state = state;
       return this;
     }
@@ -67,12 +59,12 @@ export const defineComponent = ({ name, propsKeys = [], setEvent = () => {} }, r
 
 }
 
-export const createComponent = (name, initConfig = { state: {}, props: {} }) => {
+export const createComponent = (name, state = {}) => {
   if (components[name] === undefined) {
     throw new Error(`${name} component는 존재하지 않습니다.`);
   }
   return document.createElement(name)
-                 .init(initConfig);
+                 .init(state);
 }
 
 export default { defineComponent, createComponent };
