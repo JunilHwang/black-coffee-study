@@ -1,24 +1,25 @@
 import {createComponent, defineComponent} from "../core/Component.js";
-import {UserName} from "../components/User/UserName.js";
+import '../components/User/UserName.js';
+import '../components/User/UserItem.js';
 
 const componentName = 'user-container';
 
-defineComponent({ name: componentName, propsKeys: [ 'name' ] }, () => `
-  ${UserName({ name: 'eastjun' }).outerHTML}
+defineComponent({ name: componentName }, ({ name, users }) => `
+  <user-name name="${name}"></user-name>
   <section>
     <div id="user-list">
-      <button class="ripple active">eastjun</button>
-      <button class="ripple">westjun</button>
-      <button class="ripple">southjun</button>
-      <button class="ripple">northjun</button>
-      <button class="ripple">hojun</button>
+      ${users.map(({ name, isActive }) => `
+        <user-item name="${name}" isActive="${isActive}"></user-item>
+      `).join('')}
       <button class="ripple user-create-button">+ 유저 생성</button>
     </div>
   </section>
 `);
 
 export const UserContainer = createComponent(componentName, {
-  props: {
-    name: 'eastjun'
-  }
+  name: 'eastjun',
+  users: [
+    { name: 'junil', isActive: true },
+    { name: 'eyabc', isActive: false },
+  ]
 });
