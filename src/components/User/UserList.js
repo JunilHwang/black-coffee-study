@@ -5,7 +5,9 @@ const componentName = 'user-list';
 
 
 const setEvent = $target => {
-  // $target.addEvent('click', )
+  $target.addEvent('click', 'add', () => {
+        $target.$props.addUser();
+  });
 }
 
 defineComponent({ name: componentName, setEvent }, ({ users }) => `

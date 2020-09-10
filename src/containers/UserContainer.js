@@ -4,14 +4,9 @@ import {UserList} from "../components/User/UserList.js";
 
 const componentName = 'user-container';
 
-
-const setEvent = $target => {
-  $target.addEvent('click', )
-}
-
-defineComponent({ name: componentName, setEvent }, ({ name, users }) => `
+defineComponent({ name: componentName }, ({ name, users, addUser }) => `
   <user-name name="${name}"></user-name>
-  ${UserList({ users }).outerHTML}
+  ${UserList({ users, addUser }).outerHTML}
 `);
 
 export const UserContainer = createComponent(componentName, {
@@ -19,5 +14,8 @@ export const UserContainer = createComponent(componentName, {
   users: [
     { name: 'junil', isActive: true },
     { name: 'eyabc', isActive: false },
-  ]
+  ],
+  addUser: () => {
+    console.log('test');
+  }
 });

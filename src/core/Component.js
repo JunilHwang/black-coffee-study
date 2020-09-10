@@ -7,9 +7,7 @@ export const defineComponent = ({ name, setEvent = () => {} }, render) => {
     throw new Error(`${name}은 이미 존재하는 컴포넌트입니다.`);
   }
   components[name] = class extends HTMLElement {
-
-    #attributes = {};
-    #props = {};
+    $props = {};
     static propsKeys = new Set();
 
     constructor() {
@@ -18,9 +16,9 @@ export const defineComponent = ({ name, setEvent = () => {} }, render) => {
     }
 
     connectedCallback () {
-      this.#attributes = [ ...this.attributes ].reduce((obj, { name, value }) => {
+      this.$props = [ ...this.attributes ].reduce((obj, { name, value }) => {
         try {
-          obj[name] = JSON.parse(value);
+          obj[name] = eval(value);
           this.removeAttribute(name);
         } catch (e) {
           obj[name] = value;
@@ -39,7 +37,7 @@ export const defineComponent = ({ name, setEvent = () => {} }, render) => {
     }
 
     #render () {
-      this.innerHTML = render(this.#attributes);
+      this.innerHTML = render(this.$props);
     }
 
     addEvent (eventType, ref, callback) {
