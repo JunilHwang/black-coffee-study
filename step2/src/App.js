@@ -1,49 +1,33 @@
-import { UserTitle } from "./components/UserTitle.js";
-import { UserList } from "./components/UserList.js";
-import { TodoInput } from "./components/TodoInput.js";
-import { TodoList } from "./components/TodoList.js";
-import { TodoFooter } from "./components/TodoFooter.js";
-import { FETCH_USERS, userStore } from "./store/userStore.js";
-import { FETCH_ITEMS, SET_LOADING_TYPE, todoStore } from "./store/todoStore.js";
-import LoadingTypes from "./constants/LoadingTypes.js";
-import { lazyFrame } from "./utils/index.js";
+import {Component} from "./core/Component.js";
+import {UserContainer} from "./containers/UserContainer.js";
+import {TodoContainer} from "./containers/TodoContainer.js";
+import {FETCH_USERS, SET_USER, SET_USERS, userStore} from "./store/userStore.js";
+import {getQuery} from "./utils";
+import {SET_TODO_ITEMS, todoStore} from "./store/todoStore.js";
 
-const TodoApp = class {
+const App = class extends Component{
 
-  constructor({
-    userTitleTarget,
-    userListTarget,
-    todoInputTarget,
-    todoListTarget,
-    todoFooterTarget
-  }) {
-    const userTitle = new UserTitle(userTitleTarget);
-    const userList = new UserList(userListTarget);
-    const todoInput = new TodoInput(todoInputTarget);
-    const todoList = new TodoList(todoListTarget);
-    const todoFooter = new TodoFooter(todoFooterTarget);
+  async componentInit () {
+    const users = await userStore.dispatch(FETCH_USERS);
+    const userId = getQuery('user_id');
+    const selectedIndex = Math.max(users.findIndex(({ _id }) => _id === userId), 0);
+    userStore.commit(SET_USERS, users);
+    userStore.commit(SET_USER, selectedIndex);
+    todoStore.commit(SET_TODO_ITEMS, users[selectedIndex].todoList);
 
-    userStore.addObserve(userTitle, userList);
-    todoStore.addObserve(todoList, todoFooter);
-
-    this.load();
+    this.$children = {
+      UserContainer: { constructor: UserContainer },
+      TodoContainer: { constructor: TodoContainer },
+    }
   }
 
-  async load () {
-    await Promise.all([
-      userStore.dispatch(FETCH_USERS),
-      todoStore.dispatch(FETCH_ITEMS, userStore.$getters.selectedUserName),
-      lazyFrame(),
-    ]);
-    todoStore.commit(SET_LOADING_TYPE, LoadingTypes.LOADED);
+  template () {
+    return `
+      <div data-component="UserContainer"></div>
+      <section data-component="TodoContainer" class="todoapp"></section>
+    `;
   }
 
 }
 
-new TodoApp({
-  userTitleTarget: document.querySelector('#user-title'),
-  userListTarget: document.querySelector('#user-list'),
-  todoInputTarget: document.querySelector('.input-container'),
-  todoListTarget: document.querySelector('.todo-list'),
-  todoFooterTarget: document.querySelector('.count-container'),
-})
+new App(document.querySelector('#app'));

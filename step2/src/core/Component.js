@@ -1,24 +1,55 @@
-import { debounceOneFrame } from "../utils/index.js";
+import {addEventBubblingListener, debounceOneFrame} from "../utils";
 
 export const Component = class {
 
-  $state = {}; $props; $render;
+  $target;
+  $state = {}
+  $props = {};
+  $children = {};
+  $stores = [];
 
-  constructor(target, state, props) {
-    this.$props = props;
-    this.$render = debounceOneFrame(() => {
-      target.innerHTML = this.render();
+  constructor($target, $props = {}) {
+    this.$target = $target;
+    this.$props = $props;
+    this.render = debounceOneFrame(() => {
+      this.$target.innerHTML = this.template();
+      this.#childrenBuild();
+      this.componentDidUpdate()
     });
-    this.setEvent(target);
-    this.setState(state);
+    this.#setup();
   }
 
-  setEvent (target) {}
-  render () { return '' }
+  async #setup () {
+    await this.componentInit();
+    this.$stores.forEach(store => store.addObserver(this));
+    this.render();
+    this.componentDidMount();
+    this.setEvent();
+  }
 
   setState (payload) {
     this.$state = { ...this.$state, ...payload };
-    this.$render();
+    this.render();
   }
 
+  addEvent (eventType, ref, callback) {
+    addEventBubblingListener(eventType, this.$target, `[data-ref="${ref}"]`, event => {
+      event.index = Number(event.target.closest('[data-index]')?.dataset?.index || -1);
+      callback(event);
+    });
+  }
+
+
+  #childrenBuild () {
+    this.$target.querySelectorAll('[data-component]').forEach(target => {
+      const { constructor, props } = this.$children[target.dataset.component];
+      new constructor(target, props);
+    })
+  }
+
+  componentInit () {}
+  componentDidUpdate () {}
+  componentDidMount () {}
+  setEvent () {}
+  template () { return '' }
 }
