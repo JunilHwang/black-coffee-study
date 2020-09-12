@@ -1,8 +1,5 @@
-import { Component } from "../core/Component.js";
-import { SET_USER, userStore } from "../store/userStore.js";
-import { FETCH_ITEMS, SET_LOADING_TYPE, todoStore } from "../store/todoStore.js";
-import LoadingTypes from "../constants/LoadingTypes.js";
-import { lazyFrame } from "../utils/index.js";
+import {Component} from "../../core/Component.js";
+import {userStore} from "../../store/userStore.js";
 
 export const UserList = class extends Component {
 
@@ -22,8 +19,8 @@ export const UserList = class extends Component {
   }
 
   setEvent () {
-    this.addEvent('click', 'select', ({ target }) => {
-      this.#loadItemsByUser(Number(target.dataset.index));
+    this.addEvent('click', 'select', ({ index }) => {
+      this.$props.loadItemsByUser(index);
     })
   }
 }
