@@ -1,23 +1,25 @@
 import {Component} from "./core/Component.js";
 import {UserContainer} from "./containers/UserContainer.js";
 import {TodoContainer} from "./containers/TodoContainer.js";
-import {FETCH_USERS, userStore} from "./store/userStore";
+import {FETCH_USERS, userStore} from "./store/userStore.js";
 
 const App = class extends Component{
 
-  componentInit () {
+  async componentInit () {
+    await userStore.dispatch(FETCH_USERS);
+    console.log('APP componentInit')
+
     this.$children = {
       UserContainer: { constructor: UserContainer },
       TodoContainer: { constructor: TodoContainer },
     }
-
-    userStore.dispatch(FETCH_USERS);
   }
 
-  render () {
+  template () {
+    console.log('APP template');
     return `
       <div data-component="UserContainer"></div>
-      <section data-component="UserContainer" class="todoapp"></section>
+      <section data-component="TodoContainer" class="todoapp"></section>
     `;
   }
 
