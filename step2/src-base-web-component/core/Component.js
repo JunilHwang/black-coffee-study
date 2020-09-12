@@ -1,24 +1,67 @@
 import {addEventBubblingListener} from "../utils";
 
-export const Components = class {
+const components = {};
 
-  $state; $target; $props;
+export const defineComponent = ({ name, setEvent = () => {} }, render) => {
+  if (components[name] !== undefined) {
+    throw new Error(`${name}은 이미 존재하는 컴포넌트입니다.`);
+  }
+  components[name] = class extends HTMLElement {
+    $props = {};
+    static propsKeys = new Set();
 
-  constructor($target, $props) {
-    this.$target = $target;
-    this.$props = $props;
-    this.componentInit();
-    this.render();
-    this.componentDidMount();
+    constructor() {
+      super();
+      setEvent(this);
+    }
+
+    connectedCallback () {
+      this.$props = [ ...this.attributes ].reduce((obj, { name, value }) => {
+        try {
+          obj[name] = eval(value);
+          this.removeAttribute(name);
+        } catch (e) {
+          obj[name] = value;
+        }
+        return obj;
+      }, {});
+      this.#render();
+    }
+
+    static get observedAttributes() {
+      return [ ...this.propsKeys ];
+    }
+
+    attributeChangedCallback() {
+      this.#render();
+    }
+
+    #render () {
+      this.innerHTML = render(this.$props);
+    }
+
+    addEvent (eventType, ref, callback) {
+      addEventBubblingListener(eventType, this, `[data-ref="${ref}"]`, callback);
+      return this;
+    }
+
   }
 
-  componentInit () {}
-  componentDidMount () {}
-  componentDidUpdate () {}
-  template () {}
-  render () {
-    this.$target.innerHTML = this.template();
-    this.componentDidUpdate();
-  }
+  customElements.define(name, components[name]);
 
 }
+
+export const createComponent = (name, props = {}) => {
+  if (components[name] === undefined) {
+    throw new Error(`${name} component는 존재하지 않습니다.`);
+  }
+  for (const key in props) components[name].propsKeys.add(key);
+  const component = document.createElement(name);
+  for (const [key, value] of Object.entries(props)) {
+    const isObject = typeof value === 'object';
+    component.setAttribute(key, isObject ? JSON.stringify(value) : value);
+  }
+  return component;
+}
+
+export default { defineComponent, createComponent };
