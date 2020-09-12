@@ -1,11 +1,16 @@
-import { debounceOneFrame } from "../utils/index.js";
+import {addEventBubblingListener, debounceOneFrame} from "../utils/index.js";
 
 export const Component = class {
 
-  $target; $state = {}; $props = {}; $children;
+  $target;
+  $state = {}
+  $props = {};
+  $children = {};
+  $stores = {}
 
-  constructor(target, state, props) {
-    this.$props = props;
+  constructor($target, $props = {}) {
+    this.$target = $target;
+    this.$props = $props;
     this.componentInit();
     this.render();
     this.componentDidMount();
@@ -20,6 +25,7 @@ export const Component = class {
 
   render = debounceOneFrame(() => {
     this.$target.innerHTML = this.template();
+    this.$stores.forEach(store => store.addObserver(this));
     this.#childrenBuild();
     this.componentDidUpdate()
   });
@@ -29,13 +35,13 @@ export const Component = class {
     this.render();
   }
 
-  addEvent () {
-
+  addEvent (eventType, ref, callback) {
+    addEventBubblingListener(eventType, this.$target, `[data-ref="${ref}"]`, callback);
   }
 
 
   #childrenBuild () {
-    this.$target.querySelectorAll('[data-component]').forEach(({ target}) => {
+    this.$target.querySelectorAll('[data-component]').forEach(target => {
       const { constructor, props } = this.$children[target.dataset.component];
       new constructor(target, props);
     })
