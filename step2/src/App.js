@@ -2,7 +2,7 @@ import {Component} from "./core/Component.js";
 import {UserContainer} from "./containers/UserContainer.js";
 import {TodoContainer} from "./containers/TodoContainer.js";
 import {FETCH_USERS, SET_USER, SET_USERS, userStore} from "./store/userStore.js";
-import {getQuery} from "./utils";
+import {getQuery} from "./utils/index.js";
 import {SET_TODO_ITEMS, todoStore} from "./store/todoStore.js";
 
 const App = class extends Component{

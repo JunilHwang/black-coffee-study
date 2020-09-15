@@ -1,4 +1,4 @@
-import {addEventBubblingListener, debounceOneFrame} from "../utils";
+import {addEventBubblingListener, debounceOneFrame} from "../utils/index.js";
 
 export const Component = class {
 
@@ -33,10 +33,7 @@ export const Component = class {
   }
 
   addEvent (eventType, ref, callback) {
-    addEventBubblingListener(eventType, this.$target, `[data-ref="${ref}"]`, event => {
-      event.index = Number(event.target.closest('[data-index]')?.dataset?.index || -1);
-      callback(event);
-    });
+    addEventBubblingListener(eventType, this.$target, `[data-ref="${ref}"]`, callback);
   }
 
 

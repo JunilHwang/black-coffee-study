@@ -26,7 +26,7 @@ export const Store = class {
   }
 
   dispatch (key, payload) {
-    return this.#actions[key]({
+    this.#actions[key]({
       commit: (key, payload) => this.commit(key, payload),
       dispatch: (key, payload) => this.dispatch(key, payload),
       state: { ...this.$state },
