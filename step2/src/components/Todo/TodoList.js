@@ -1,8 +1,8 @@
 import {Component} from "../../core/Component.js";
-import {SET_EDITING, todoStore} from "../../store/todoStore.js";
+import {PUT_ITEM, PUT_PRIORITY_ITEM, REMOVE_ITEM, SET_EDITING, todoStore, TOGGLE_ITEM} from "../../store/todoStore.js";
 import {userStore} from "../../store/userStore.js";
 import LoadingTypes from "../../constants/LoadingTypes.js";
-import PriorityTypes from "../../constants/PriorityTypes.js";
+import Priority from "../../constants/Priority.js";
 
 const loadingArray = [ ...Array(5).keys() ];
 
@@ -25,27 +25,67 @@ const getItemClass = (completed, editing) => editing   ? ' class="editing"'   :
 
 export const TodoList = class extends Component {
 
+  get #user () {
+    return userStore.$getters.selectedUser?._id;
+  }
+
+  #removeItem (index) {
+    const { todoItems } = todoStore.$state;
+    todoStore.dispatch(REMOVE_ITEM, {
+      user: this.#user,
+      id: todoItems[index]._id,
+    });
+  }
+
+  #toggleItem (index) {
+    const { todoItems } = todoStore.$state;
+    todoStore.dispatch(TOGGLE_ITEM, {
+      user: this.#user,
+      id: todoItems[index]._id,
+    });
+  }
+
+  #updateItem (contents) {
+    const { editingItem } = todoStore.$getters;
+    editingItem.contents = contents;
+    todoStore.dispatch(PUT_ITEM, {
+      user: this.#user,
+      item: editingItem
+    })
+  }
+
+  #selectPriority (index, priority) {
+    const { todoItems } = todoStore.$state;
+    todoItems[index].priority = Number(priority);
+    todoStore.dispatch(PUT_PRIORITY_ITEM, {
+      user: this.#user,
+      item: todoItems[index]
+    })
+  }
+
   componentInit () {
     this.$stores = [ todoStore, userStore ];
   }
 
   template () {
-    const { loading, editingIndex, items } = this.$props
+    const { loading, editingIndex } = todoStore.$state;
+    const items = todoStore.$getters.filteredItems;
     if (loading === LoadingTypes.INIT) {
       return loadingArray.map(() => progressTemplate).join('')
     }
+    console.log(editingIndex);
     return items.map(([ index, { _id, contents, isCompleted, priority, isLoading = false } ]) =>
       isLoading ? progressTemplate : `
-      <li ${getItemClass(isCompleted, editingIndex === Number(index))} data-index="${index}">
+      <li ${getItemClass(isCompleted, editingIndex === index)} data-index="${index}">
         <div class="view">
           <input data-ref="toggle" class="toggle" type="checkbox" ${isCompleted ? 'checked' : ''} />
           <label data-ref="contents" class="label">
-            ${ priority === PriorityTypes.FIRST ? `<span class="chip primary">1순위</span>` :
-               priority === PriorityTypes.SECOND ? `<span class="chip secondary">2순위</span>` : `
+            ${ priority === Priority.PRIMARY ? `<span class="chip primary">1순위</span>` :
+               priority === Priority.SECONDARY ? `<span class="chip secondary">2순위</span>` : `
               <select data-ref="priority" class="chip select">
-                <option value="${PriorityTypes.NONE}" selected>순위</option>
-                <option value="${PriorityTypes.FIRST}">1순위</option>
-                <option value="${PriorityTypes.SECOND}">2순위</option>
+                <option value="${Priority.NONE}" selected>순위</option>
+                <option value="${Priority.SECONDARY}">1순위</option>
+                <option value="${Priority.PRIMARY}">2순위</option>
               </select>`}
             ${contents}
           </label>
@@ -57,18 +97,17 @@ export const TodoList = class extends Component {
   }
 
   setEvent () {
-    const { removeItem, toggleItem, selectPriority, updateItem, editingItem } = this.$props;
-    this.addEvent('click', 'destroy', ({  index }) => removeItem(index));
-    this.addEvent('change', 'toggle', ({  index }) => toggleItem(index));
-    this.addEvent('change', 'priority', ({ target, index }) => selectPriority(index, target.value));
-    this.addEvent('dblclick', 'contents', ({ index }) => editingItem(index));
+    this.addEvent('click', 'destroy', ({  index }) => this.#removeItem(index));
+    this.addEvent('change', 'toggle', ({  index }) => this.#toggleItem(index));
+    this.addEvent('change', 'chip', ({ target, index }) => this.#selectPriority(index, target.value));
+    this.addEvent('dblclick', 'contents', ({ index }) => todoStore.commit(SET_EDITING, index));
     this.addEvent('keydown', 'editor', ({ key }) => {
       if (key !== 'Escape') return;
-      editingItem(-1);
+      todoStore.commit(SET_EDITING, -1);
     });
     this.addEvent('keypress', 'editor', ({ key, target }) => {
       if (key !== 'Enter') return;
-      updateItem(target.value);
+      this.#updateItem(target.value);
     });
   }
 }
