@@ -5,27 +5,24 @@ import {TodoListOfTeam} from "../components/Todo/TodoListOfTeam";
 import {FETCH_TEAM, todoOfTeamStore} from "../store/todoOfTeamStore";
 import {TodoMemberAppendForm} from "../components/Todo/TodoMemberAppendForm";
 
-export const Kanban = class extends Component {
+export const Kanban = class extends Component<{}> {
 
-  render () {
-    return `
-      <h1 id="user-title"></h1>
-      <ul id="todo-list-of-team" class="todoapp-list-container flex-column-container"></ul>
-      <div id="member-append-form"></div>
-    `;
+  protected async componentInit() {
+    await todoOfTeamStore.dispatch(FETCH_TEAM, todoRouter.$query.id);
+
+    this.$children = {
+      TodoHeader: { constructor: TodoHeader },
+      TodoListOfTeam: { constructor: TodoListOfTeam },
+      TodoMemberAppendForm: { constructor: TodoMemberAppendForm },
+    }
   }
 
-  componentDidMount () {
-    const $todoHeader = this.$target.querySelector('#user-title');
-    const $todoListOfTeam = this.$target.querySelector('#todo-list-of-team');
-    const $memberAppendForm = this.$target.querySelector('#member-append-form');
-
-    const todoHeader = new TodoHeader($todoHeader);
-    const todoListOfTeam = new TodoListOfTeam($todoListOfTeam);
-    const todoMemberAppendForm = new TodoMemberAppendForm($memberAppendForm);
-
-    todoOfTeamStore.addObserve(todoHeader, todoListOfTeam, todoMemberAppendForm);
-    todoOfTeamStore.dispatch(FETCH_TEAM, todoRouter.$query.id);
+  template () {
+    return `
+      <h1 data-component="TodoHeader" id="user-title"></h1>
+      <ul data-component="TodoListOfTeam" id="todo-list-of-team" class="todoapp-list-container flex-column-container"></ul>
+      <div data-component="TodoMemberAppendForm" id="member-append-form"></div>
+    `;
   }
 
 }
