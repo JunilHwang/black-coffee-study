@@ -1,8 +1,9 @@
-import {Component} from "../../core/Component.js";
-import {DELETE_ITEM, SET_EDITING, todoOfTeamStore, TOGGLE_ITEM, UPDATE_ITEM} from "../../store/todoOfTeamStore.js";
-import {TodoListFooter} from "./TodoListFooter.js";
-import {TodoItemAppender} from "./TodoItemAppender.js";
-import PriorityTypes from "../../constants/PriorityTypes.js";
+import {Component} from "../../core/Component";
+import {DELETE_ITEM, SET_EDITING, TOGGLE_ITEM, UPDATE_ITEM, UPDATE_ITEM_PRIORITY, todoOfTeamStore} from "../../store/todoOfTeamStore";
+import {TodoListFooter} from "./TodoListFooter";
+import {TodoItemAppender} from "./TodoItemAppender";
+import PriorityTypes from "../../constants/PriorityTypes";
+import FilterTypes from "../../constants/FilterTypes";
 
 const priorityChip = {
   [PriorityTypes.PRIMARY]: 'primary',
@@ -14,11 +15,18 @@ export const TodoList = class extends Component {
   get #member () {
     return todoOfTeamStore.$state.members[this.$props.id];
   }
-
-  get #filteredItems () {
-    return todoOfTeamStore.$getters.membersByFilteredTodoList[this.$props.id];
+  
+  get #filterType () {
+    return todoOfTeamStore.$state.filterType[this.$props.id];
   }
 
+  get #filteredItems () {
+    const items = todoOfTeamStore.$getters.membersByFilteredTodoList[this.$props.id];
+    if (this.#filterType === FilterTypes.PRIORITY) {
+      items.sort((a, b) => (a.priority || 100) - (b.priority || 100));
+    }
+    return items;
+  }
   isEditingOf (id) {
     return todoOfTeamStore.$state.editing === id;
   }
@@ -39,10 +47,10 @@ export const TodoList = class extends Component {
                   <label class="label" data-ref="editing">
                     <div class="chip-container">
                       ${priority === 0 ? `
-                        <select class="chip select">
-                          <option value="0" selected>순위</option>
-                          <option value="1">1순위</option>
-                          <option value="2">2순위</option>
+                        <select class="chip select" data-ref="priority">
+                          <option value="${PriorityTypes.NONE}" selected>순위</option>
+                          <option value="${PriorityTypes.PRIMARY}">1순위</option>
+                          <option value="${PriorityTypes.SECONDARY}">2순위</option>
                         </select>` : `
                         <span class="chip ${priorityChip[priority]}">${priority}순위</span>                        
                       `}
@@ -81,8 +89,13 @@ export const TodoList = class extends Component {
       this.#editing(getId(target));
     });
     this.addEvent('edited', 'keypress', ({ target, key }) => {
-      if (key !== 'Enter') return;
-      this.#edited(getId(target), target.value);
+      if (key === 'Enter') this.#edited(getId(target), target.value);
+    });
+    this.addEvent('edited', 'keyup', ({ key }) => {
+      if (key === 'Escape') this.#cancel();
+    });
+    this.addEvent('priority', 'change', ({ target }) => {
+      this.#updatePriority(getId(target), target.value);
     });
   }
 
@@ -100,6 +113,14 @@ export const TodoList = class extends Component {
 
   #edited (itemId, contents) {
     todoOfTeamStore.dispatch(UPDATE_ITEM, { memberId: this.$props.id, itemId, contents });
+    this.#cancel();
+  }
+
+  #cancel () {
     todoOfTeamStore.commit(SET_EDITING, null);
+  }
+
+  #updatePriority (itemId, priority) {
+    todoOfTeamStore.dispatch(UPDATE_ITEM_PRIORITY, { memberId: this.$props.id, itemId, priority });
   }
 }

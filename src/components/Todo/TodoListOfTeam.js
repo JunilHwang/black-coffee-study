@@ -1,23 +1,23 @@
-import {Component} from "../../core/Component.js";
-import {TodoAppender} from "./TodoAppender.js";
-import {TodoList} from "./TodoList.js";
-import {todoOfTeamStore} from "../../store/todoOfTeamStore.js";
+import {Component} from "../../core/Component";
+import {TodoMemberAppender} from "./TodoMemberAppender";
+import {TodoList} from "./TodoList";
+import {todoOfTeamStore} from "../../store/todoOfTeamStore";
 
 export const TodoListOfTeam = class extends Component {
 
   render () {
     const { members } = todoOfTeamStore.$state;
     return `
-      ${members.map(({ _id }) => `
-        <li class="todoapp-container" data-id="${_id}"></li>
+      ${Object.keys(members).map(id => `
+        <li class="todoapp-container" data-id="${id}"></li>
       `).join('')}
-      <li id="todo-appender" class="add-user-button-container"></li>
+      <li id="todo-member-appender" class="add-user-button-container"></li>
     `
   }
 
   componentDidMount () {
-    const $todoAppender = this.$target.querySelector('#todo-appender');
-    new TodoAppender($todoAppender);
+    const $todoMemberAppender = this.$target.querySelector('#todo-member-appender');
+    new TodoMemberAppender($todoMemberAppender);
     this.$target.querySelectorAll('.todoapp-container').forEach($todoList => {
       new TodoList($todoList, {
         id: $todoList.dataset.id

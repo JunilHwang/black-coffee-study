@@ -1,16 +1,15 @@
 import {Component} from "../../core/Component";
-import {ADD_TEAM_MEMBER, todoOfTeamStore} from "../../store/todoOfTeamStore";
-import {SET_OPENED_APPEND_FORM} from "../../store/todoOfTeamStore";
+import {ADD_TEAM, SET_OPENED_APPEND_FORM, teamStore} from "../../store/teamStore";
 
-export const TodoMemberAppendForm = class extends Component {
+export const TeamAppendForm = class extends Component {
 
   render () {
-    const { openedAppendForm } = todoOfTeamStore.$state;
+    const { openedAppendForm } = teamStore.$state;
     return openedAppendForm ? `
       <div class="modal" data-ref="close">
         <div class="modal-box">
           <button type="button" class="modal-close-button" data-ref="close">×</button>
-          <h3 class="modal-title">멤버 추가하기</h3>
+          <h3 class="modal-title">팀 추가하기</h3>
           <div class="appendForm">
             <input type="text" data-ref="team-name" />
             <button type="button">추가하기</button>
@@ -37,12 +36,12 @@ export const TodoMemberAppendForm = class extends Component {
   }
 
   #close () {
-    todoOfTeamStore.commit(SET_OPENED_APPEND_FORM, false);
+    teamStore.commit(SET_OPENED_APPEND_FORM, false);
   }
 
   async #appendTeam (name) {
     try {
-      await todoOfTeamStore.dispatch(ADD_TEAM_MEMBER, name);
+      await teamStore.dispatch(ADD_TEAM, name);
       this.#close();
     } catch (e) {
       console.error(e);
