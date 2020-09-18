@@ -1,16 +1,14 @@
 import { Component } from "./Component";
 
-export type Getter<T> = (state: T) => any;
-export interface Getters<T> { [k: string]: Getter<T> }
-export interface Mutations<T> { [k: string]: (state: T, payload: any) => void }
+export type Getter<T> = (state: T) => unknown;
+export type Getters<T> = Record<string, Getter<T>>;
+export type Mutations<T> = Record<string, (state: T, payload: unknown) => void>;
 export interface ActionContext<T> {
   state: T,
-  commit: (key: string, payload: any) => void,
-  dispatch: (key: string, payload?: any) => Promise<any> | void,
+  commit: (key: string, payload: unknown) => void,
+  dispatch: (key: string, payload?: unknown) => Promise<unknown> | void,
 }
-export interface Actions<T> {
-  [k: string]: (context: ActionContext<T>, payload: any) => Promise<any> | void
-}
+export type Actions<T> = Record<string, (context: ActionContext<T>, payload?: unknown) => Promise<unknown> | void>;
 export interface StoreProps<T> {
   state: T
   getters?: Getters<T>
@@ -24,7 +22,7 @@ export class Store<T> {
   public readonly $getters: Getters<T>;
   private readonly mutations: Mutations<T>;
   private readonly actions: Actions<T>;
-  private readonly observers: Set<Component<any>> = new Set();
+  private readonly observers: Set<Component> = new Set();
 
   constructor({ state, getters = {}, mutations = {}, actions = {} }: StoreProps<T>) {
     this.$state = state;
@@ -37,21 +35,21 @@ export class Store<T> {
     this.actions = actions;
   }
 
-  public commit (key: string, payload: any): void {
+  public commit (key: string, payload: unknown): void {
     const newState: T = { ...this.$state };
     this.mutations[key](newState, payload);
     this.setState(newState);
   }
 
-  public dispatch (key: string, payload?: any): Promise<any> | void {
+  public dispatch (key: string, payload?: unknown): Promise<unknown> | void {
     return this.actions[key]({
-      commit: (key: string, payload: any) => this.commit(key, payload),
-      dispatch: (key: string, payload: any) => this.dispatch(key, payload),
+      commit: (key: string, payload: unknown) => this.commit(key, payload),
+      dispatch: (key: string, payload: unknown) => this.dispatch(key, payload),
       state: { ...this.$state },
     }, payload);
   }
 
-  public addObserver (...components: Component<any>[]) {
+  public addObserver (...components: Component[]) {
     components.forEach(component => this.observers.add(component));
   }
 
