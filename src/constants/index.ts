@@ -6,8 +6,15 @@ export const enum HttpMethod {
   DELETE = 'DELETE',
 }
 
-export const enum Priority {
+export const enum PriorityTypes {
   NONE,
   PRIMARY,
   SECONDARY
+}
+
+export const enum FilterTypes {
+  ALL = 'all',
+  PRIORITY = 'priority',
+  ACTIVE = 'active',
+  COMPLETED = 'completed',
 }
