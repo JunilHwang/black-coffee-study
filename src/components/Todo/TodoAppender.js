@@ -1,8 +1,8 @@
 import {Component} from "@/core";
 import {SET_OPENED_APPEND_FORM, todoOfTeamStore} from "@/store/todoOfTeamStore";
 
-export const TodoAppender = class extends Component {
-  render () {
+export const TodoMemberAppender = class extends Component {
+  template () {
     return `
       <button id="add-user-button" class="ripple" data-ref="append">
         <span class="material-icons">add</span>
