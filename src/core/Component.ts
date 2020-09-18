@@ -2,22 +2,22 @@ import {addEventBubblingListener, debounceOneFrame} from "@/utils";
 import {Store} from "./Store";
 import {ComponentConstructable} from "@/domains";
 
-export interface ChildrenProps {
-  [k: string]: {
-    constructor: ComponentConstructable,
-    props?: any
-  }
+export interface ChildrenProp {
+  constructor: ComponentConstructable,
+  props?: any
 }
 
-export class Component<T> {
+export type ChildrenProps = Record<string, ChildrenProp>;
 
-  protected $state?: T;
+export class Component<Props = {}, State = {}> {
+
+  protected $state?: State;
   protected $stores: Store<any>[] = [];
   protected $children: ChildrenProps = {};
 
   constructor(
     protected readonly $target: HTMLElement,
-    protected readonly $props: Object = {}
+    protected readonly $props: Props
   ) {
     this.setup();
   }
@@ -54,7 +54,7 @@ export class Component<T> {
     this.render();
   }
 
-  protected addEvent (ref: HTMLElement, eventType: string, callback: (event: Event) => void) {
+  protected addEvent (ref: string, eventType: string, callback: EventListener) {
     addEventBubblingListener(this.$target, `[data-ref="${ref}"]`, eventType, callback);
   }
 
