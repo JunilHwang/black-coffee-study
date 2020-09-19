@@ -69,7 +69,7 @@
 ## Step3
 
 - [소스코드](./step3)
-- [데모](https://junilhwang.github.io/black-coffee-study/step2/index.html)
+- [데모](https://junilhwang.github.io/black-coffee-study/step3/index.html)
 
 ### 미션 수행 기록
 
