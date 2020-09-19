@@ -4,20 +4,25 @@ import {TodoListFooter} from "./TodoListFooter";
 import {TodoItemAppender} from "./TodoItemAppender";
 import {PriorityTypes, FilterTypes, priorityValueOf, getPriorityChip} from "@/constants";
 import {TodoItem} from "@/domains";
+import {selectElement} from "@/utils";
 
 export const TodoList = class extends Component<{ id: string }> {
 
+  private get id () {
+    return this.$props!.id;
+  }
+
   private get member () {
-    return todoOfTeamStore.$state.members[this.$props.id];
+    return todoOfTeamStore.$state.members[this.id];
   }
   
   private get filterType () {
-    return todoOfTeamStore.$state.filterType[this.$props.id];
+    return todoOfTeamStore.$state.filterType[this.id];
   }
 
   private get filteredItems () {
     const memberOfItem: Record<string, any> = todoOfTeamStore.$getters.membersByFilteredTodoList;
-    const items: TodoItem[] = memberOfItem[this.$props.id];
+    const items: TodoItem[] = memberOfItem[this.id];
     if (this.filterType === FilterTypes.PRIORITY) {
       items.sort((a, b) => (a.priority || 100) - (b.priority || 100));
     }
@@ -66,12 +71,12 @@ export const TodoList = class extends Component<{ id: string }> {
     `;
   }
 
-
   componentDidMount () {
-    const $todoListFooter = this.$target.querySelector('#todo-list-footer') as HTMLElement;
-    const $todoItemAppender = this.$target.querySelector('#todo-item-appender') as HTMLElement;
-    new TodoListFooter($todoListFooter, { id: this.$props.id });
-    new TodoItemAppender($todoItemAppender, { id: this.$props.id });
+    const { $target } = this;
+    const $todoListFooter = selectElement('#todo-list-footer', $target);
+    const $todoItemAppender = selectElement('#todo-item-appender', $target);
+    new TodoListFooter($todoListFooter, { id: this.id });
+    new TodoItemAppender($todoItemAppender, { id: this.id });
   }
 
   setEvent () {
@@ -103,11 +108,11 @@ export const TodoList = class extends Component<{ id: string }> {
   }
 
   private toggle (itemId: string) {
-    todoOfTeamStore.dispatch(TOGGLE_ITEM, { memberId: this.$props.id, itemId });
+    todoOfTeamStore.dispatch(TOGGLE_ITEM, { memberId: this.id, itemId });
   }
 
   private remove (itemId: string) {
-    todoOfTeamStore.dispatch(DELETE_ITEM, { memberId: this.$props.id, itemId });
+    todoOfTeamStore.dispatch(DELETE_ITEM, { memberId: this.id, itemId });
   }
 
   private editing (itemId: string) {
@@ -115,7 +120,7 @@ export const TodoList = class extends Component<{ id: string }> {
   }
 
   private edited (itemId: string, contents: string) {
-    todoOfTeamStore.dispatch(UPDATE_ITEM, { memberId: this.$props.id, itemId, contents });
+    todoOfTeamStore.dispatch(UPDATE_ITEM, { memberId: this.id, itemId, contents });
     this.cancel();
   }
 
@@ -124,6 +129,6 @@ export const TodoList = class extends Component<{ id: string }> {
   }
 
   private updatePriority (itemId: string, priority: number) {
-    todoOfTeamStore.dispatch(UPDATE_ITEM_PRIORITY, { memberId: this.$props.id, itemId, priority });
+    todoOfTeamStore.dispatch(UPDATE_ITEM_PRIORITY, { memberId: this.id, itemId, priority });
   }
 }

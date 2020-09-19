@@ -1,5 +1,6 @@
 import {Component} from "@/core";
-import {ADD_TEAM_MEMBER, todoOfTeamStore, SET_OPENED_APPEND_FORM} from "@/store/todoOfTeamStore";
+import {ADD_TEAM_MEMBER, todoOfTeamStore, SET_OPENED_APPEND_FORM} from "@/store";
+import {selectElement} from "@/utils";
 
 export const TodoMemberAppendForm = class extends Component {
 
@@ -21,30 +22,29 @@ export const TodoMemberAppendForm = class extends Component {
 
   componentDidUpdate () {
     const $target = this.$target;
-    const modalBox = $target.querySelector('.modal-box') as HTMLElement;
-    const input = $target.querySelector('input') as HTMLInputElement;
-    modalBox.addEventListener('click', event => {
+    selectElement('.modal-box', $target).addEventListener('click', event => {
       if ($target === event.currentTarget) event.stopPropagation();
     });
-    input.focus();
+    selectElement('input', $target).focus();
   }
 
   setEvent () {
-    this.addEvent('close', 'click', () => this.#close());
-    this.addEvent('team-name', 'keyup', ({ key, target }) => {
-      if (key === 'Escape') this.#close();
-      if (key === 'Enter') this.#appendTeam(target.value);
+    this.addEvent('close', 'click', () => this.close());
+    this.addEvent('team-name', 'keyup', event => {
+      const { key, target } = event as KeyboardEvent;
+      if (key === 'Escape') this.close();
+      if (key === 'Enter') this.appendTeam((target as HTMLInputElement).value);
     })
   }
 
-  #close () {
+  private close () {
     todoOfTeamStore.commit(SET_OPENED_APPEND_FORM, false);
   }
 
-  async #appendTeam (name) {
+  private async appendTeam (name: string) {
     try {
       await todoOfTeamStore.dispatch(ADD_TEAM_MEMBER, name);
-      this.#close();
+      this.close();
     } catch (e) {
       console.error(e);
     }
