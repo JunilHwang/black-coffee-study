@@ -1,7 +1,8 @@
-import { Store } from '../core/Store.js';
+import {Store} from '../core/Store.js';
 import TodoService from "../services/TodoService.js";
 import FilterTypes from '../constants/FilterTypes.js';
 import LoadingTypes from "../constants/LoadingTypes.js";
+import PriorityTypes from "../constants/PriorityTypes.js";
 
 export const SET_TODO_ITEMS = 'SET_TODO_ITEMS';
 export const SET_EDITING = 'SET_EDITING';
@@ -10,6 +11,8 @@ export const SET_LOADING_TYPE = 'SET_LOADING_TYPE';
 export const SET_ADD_LOADING_ITEM = 'SET_ADD_LOADING_ITEM';
 export const SET_LOADING_ITEM = 'SET_LOADING_ITEM';
 export const SET_LOADING_ALL = 'SET_LOADING_ALL';
+export const SET_PRIORITY = 'SET_PRIORITY';
+
 export const FETCH_ITEMS = 'FETCH_ITEMS';
 export const ADD_ITEM = 'ADD_ITEM';
 export const PUT_ITEM = 'PUT_ITEM';
@@ -37,11 +40,13 @@ export const todoStore = new Store({
       state.filterType = filterType;
     },
     [SET_ADD_LOADING_ITEM] (state) {
-      state.todoItems.push({ isLoading: true });
+      state.todoItems = [...state.todoItems, { isLoading: true }];
     },
     [SET_LOADING_ITEM] (state, id) {
-      const index = state.todoItems.findIndex(item => item._id === id);
-      state.todoItems[index] = { isLoading: true };
+      const todoItems = [ ...state.todoItems ];
+      const index = todoItems.findIndex(item => item._id === id);
+      todoItems[index] = { isLoading: true };
+      state.todoItems = todoItems;
     },
     [SET_LOADING_ALL] (state) {
       state.todoItems = state.todoItems.map(item => ({
@@ -51,6 +56,14 @@ export const todoStore = new Store({
     },
     [SET_LOADING_TYPE] (state, loading) {
       state.loading = loading;
+    },
+    [SET_PRIORITY] (state, index) {
+      const todoItems = [ ...state.todoItems ];
+      todoItems[index] = {
+        ...todoItems[index],
+        priority: PriorityTypes.NONE
+      };
+      state.todoItems = todoItems;
     },
   },
 
@@ -90,6 +103,7 @@ export const todoStore = new Store({
     },
 
     async [PUT_PRIORITY_ITEM] ({ dispatch, commit }, { userId, item }) {
+      console.log(item);
       commit(SET_LOADING_ITEM, item._id);
       await TodoService.putPriorityItem(userId, item);
       return dispatch(FETCH_ITEMS, userId);
@@ -110,7 +124,7 @@ export const todoStore = new Store({
     async [REMOVE_ALL_ITEM] ({ dispatch, commit }, userId) {
       commit(SET_LOADING_ALL);
       await TodoService.removeAllItem(userId);
-      return dispatch(FETCH_ITEMS, userId);
+      return dispatch(FETCH_ITEMS, user);
     }
   }
 })
