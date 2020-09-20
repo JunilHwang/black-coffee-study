@@ -103,7 +103,6 @@ export const todoStore = new Store({
     },
 
     async [PUT_PRIORITY_ITEM] ({ dispatch, commit }, { userId, item }) {
-      console.log(item);
       commit(SET_LOADING_ITEM, item._id);
       await TodoService.putPriorityItem(userId, item);
       return dispatch(FETCH_ITEMS, userId);
@@ -124,7 +123,7 @@ export const todoStore = new Store({
     async [REMOVE_ALL_ITEM] ({ dispatch, commit }, userId) {
       commit(SET_LOADING_ALL);
       await TodoService.removeAllItem(userId);
-      return dispatch(FETCH_ITEMS, user);
+      return dispatch(FETCH_ITEMS, userId);
     }
   }
 })

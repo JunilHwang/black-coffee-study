@@ -34,7 +34,10 @@ export const Component = class {
   }
 
   addEvent (eventType, ref, callback) {
-    addEventBubblingListener(eventType, this.$target, `[data-ref="${ref}"]`, callback);
+    addEventBubblingListener(eventType, this.$target, `[data-ref="${ref}"]`, event => {
+      event.index = Number(event.target.closest('[data-index]')?.dataset?.index || -1);
+      callback(event);
+    });
   }
 
   $children = () => {};
