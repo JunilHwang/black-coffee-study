@@ -1,12 +1,12 @@
 import {addEventBubblingListener, debounceOneFrame} from "../utils/index.js";
+import {observable, observe} from "./Observer";
 
 export const Component = class {
 
   $target;
-  $state = {}
-  $props = {};
+  $props;
+  $state = {};
   $children = {};
-  $stores = [];
 
   constructor($target, $props = {}) {
     this.$target = $target;
@@ -16,8 +16,8 @@ export const Component = class {
 
   async #setup () {
     await this.componentInit();
-    this.$stores.forEach(store => store.addObserver(this));
-    this.render();
+    this.$state = observable(this.$state);
+    observe(() => this.render());
     this.componentDidMount();
     this.setEvent();
   }
@@ -29,8 +29,9 @@ export const Component = class {
   });
 
   setState (payload) {
-    this.$state = { ...this.$state, ...payload };
-    this.render();
+    for (const [key, value] in Object.entries(payload)) {
+      this.$state[key] = value;
+    }
   }
 
   addEvent (eventType, ref, callback) {
