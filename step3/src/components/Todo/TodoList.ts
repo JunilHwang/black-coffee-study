@@ -1,12 +1,24 @@
-import {Component} from "@/core";
-import {DELETE_ITEM, SET_EDITING, TOGGLE_ITEM, UPDATE_ITEM, UPDATE_ITEM_PRIORITY, todoOfTeamStore} from "@/store";
+import {Component} from "@/_core";
+import {
+  DELETE_ITEM,
+  DELETE_TEAM_MEMBER,
+  SET_EDITING,
+  todoOfTeamStore,
+  TOGGLE_ITEM,
+  UPDATE_ITEM,
+  UPDATE_ITEM_PRIORITY
+} from "@/store";
 import {TodoListFooter} from "./TodoListFooter";
 import {TodoItemAppender} from "./TodoItemAppender";
-import {PriorityTypes, FilterTypes, getPriorityChip} from "@/constants";
+import {FilterTypes, getPriorityChip, PriorityTypes} from "@/constants";
 import {CommonEvent, KeyEvent, TodoItem} from "@/domains";
 import {selectParent} from "@/utils";
 
-export const TodoList = class extends Component<{ id: string }> {
+const sortByPriority = (priority: PriorityTypes) =>
+  priority === PriorityTypes.FIRST ? 1 :
+  priority === PriorityTypes.SECOND ? 2 : 3;
+
+export const TodoList = class extends Component<{  id: string }> {
 
   private get id () {
     return this.$props!.id;
@@ -24,7 +36,8 @@ export const TodoList = class extends Component<{ id: string }> {
     const memberOfItem: Record<string, any> = todoOfTeamStore.$getters.membersByFilteredTodoList;
     const items: TodoItem[] = memberOfItem[this.id];
     if (this.filterType === FilterTypes.PRIORITY) {
-      items.sort((a, b) => (a.priority || 100) - (b.priority || 100));
+      items.sort((a, b) =>
+        sortByPriority(a.priority) - sortByPriority(b.priority));
     }
     return items;
   }
@@ -41,6 +54,10 @@ export const TodoList = class extends Component<{ id: string }> {
     todoOfTeamStore.dispatch(DELETE_ITEM, { memberId: this.id, itemId });
   }
 
+  private removeMember () {
+    todoOfTeamStore.dispatch(DELETE_TEAM_MEMBER, this.id);
+  }
+
   private editing (itemId: string) {
     todoOfTeamStore.commit(SET_EDITING, itemId);
   }
@@ -54,12 +71,11 @@ export const TodoList = class extends Component<{ id: string }> {
     todoOfTeamStore.commit(SET_EDITING, null);
   }
 
-  private updatePriority (itemId: string, priority: number) {
+  private updatePriority (itemId: string, priority: string) {
     todoOfTeamStore.dispatch(UPDATE_ITEM_PRIORITY, { memberId: this.id, itemId, priority });
   }
 
   protected componentInit() {
-    this.$stores = [ todoOfTeamStore ];
     const props = { id: this.id };
     this.$children = {
       TodoItemAppender: { constructor: TodoItemAppender, props  },
@@ -71,6 +87,7 @@ export const TodoList = class extends Component<{ id: string }> {
     return `
       <h2>
         <span><strong>${this.member.name}</strong>'s Todo List</span>
+        <button type="button" data-ref="removeMember">⌫</button>
       </h2>
       <div class="todoapp">
         <section data-component="TodoItemAppender" id="todo-item-appender" class="input-container"></section>
@@ -82,11 +99,11 @@ export const TodoList = class extends Component<{ id: string }> {
                   <input class="toggle" type="checkbox" data-ref="toggle" ${ isCompleted ? 'checked' : '' } />
                   <label class="label" data-ref="editing">
                     <div class="chip-container">
-                      ${priority === 0 ? `
+                      ${priority === PriorityTypes.NONE ? `
                         <select class="chip select" data-ref="priority">
                           <option value="${PriorityTypes.NONE}" selected>순위</option>
-                          <option value="${PriorityTypes.PRIMARY}">1순위</option>
-                          <option value="${PriorityTypes.SECONDARY}">2순위</option>
+                          <option value="${PriorityTypes.FIRST}">1순위</option>
+                          <option value="${PriorityTypes.SECOND}">2순위</option>
                         </select>` : `
                         <span class="chip ${getPriorityChip(priority)}">${priority}순위</span>                        
                       `}
@@ -130,11 +147,16 @@ export const TodoList = class extends Component<{ id: string }> {
       if (key === 'Escape') this.cancel();
     });
 
+    this.addEvent('removeMember', 'click', () => {
+      if (!confirm('정말로 삭제하시겠습니까?')) return;
+      this.removeMember();
+    });
+
     this.addEvent<CommonEvent<HTMLInputElement>>(
       'priority',
       'change',
       ({ target }) => {
-      this.updatePriority(getId(target), Number(target.value));
+      this.updatePriority(getId(target), target.value);
     });
 
   }

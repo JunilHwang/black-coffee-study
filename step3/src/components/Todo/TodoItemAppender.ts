@@ -1,13 +1,8 @@
-import {Component} from "@/core";
+import {Component} from "@/_core";
 import {ADD_ITEM, todoOfTeamStore} from "@/store/todoOfTeamStore";
 import {KeyEvent} from "@/domains";
-import {teamStore} from "@/store";
 
 export const TodoItemAppender = class extends Component<{ id: string }> {
-
-  protected componentInit() {
-    this.$stores = [ teamStore ];
-  }
 
   protected template () {
     return `
