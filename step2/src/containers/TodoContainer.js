@@ -8,95 +8,84 @@ import {
   PUT_ITEM,
   PUT_PRIORITY_ITEM, REMOVE_ALL_ITEM,
   REMOVE_ITEM, SET_EDITING,
-  SET_FILTER_TYPE,
+  SET_FILTER_TYPE, SET_PRIORITY,
   todoStore,
   TOGGLE_ITEM
 } from "../store/todoStore.js";
 
 export const TodoContainer = class extends Component {
 
-  get user () { return userStore.$getters.selectedUser?._id; }
+  get userId () { return userStore.$getters.selectedUser?._id; }
 
-  appendItem (contents) {
-    todoStore.dispatch(ADD_ITEM, { userId: this.user, contents });
-  }
+  appendItem = contents => todoStore.dispatch(ADD_ITEM, { userId: this.userId, contents });
 
-  removeItem (index) {
+  removeItem = index => {
     const { todoItems } = todoStore.$state;
     todoStore.dispatch(REMOVE_ITEM, {
-      userId: this.user,
+      userId: this.userId,
       itemId: todoItems[index]._id,
     });
   }
 
-  toggleItem (index) {
+  toggleItem = index => {
     const { todoItems } = todoStore.$state;
     todoStore.dispatch(TOGGLE_ITEM, {
-      userId: this.user,
+      userId: this.userId,
       itemId: todoItems[index]._id,
     });
   }
 
-  updateItem (contents) {
+  updateItem = contents => {
     const { editingItem } = todoStore.$getters;
     editingItem.contents = contents;
     todoStore.dispatch(PUT_ITEM, {
-      userId: this.user,
+      userId: this.userId,
       item: editingItem
     })
   }
 
-  selectPriority (index, priority) {
+  selectPriority = (index, priority) => {
     const item = todoStore.$state.todoItems[index];
     item.priority = priority;
-    todoStore.dispatch(PUT_PRIORITY_ITEM, { userId: this.user, item });
+    todoStore.dispatch(PUT_PRIORITY_ITEM, { userId: this.userId, item });
   }
 
-  editingItem (index) {
-    todoStore.commit(SET_EDITING, index);
-  }
+  editPriority = index => todoStore.commit(SET_PRIORITY, index);
+  editingItem = index => todoStore.commit(SET_EDITING, index);
+  filterItem = filterType => todoStore.commit(SET_FILTER_TYPE, filterType);
+  removeAll = () => todoStore.dispatch(REMOVE_ALL_ITEM, this.userId);
 
-  filterItem (filterType) {
-    todoStore.commit(SET_FILTER_TYPE, filterType);
-  }
-
-  removeAll () {
-    todoStore.dispatch(REMOVE_ALL_ITEM, this.user);
-  }
-
-  componentInit () {
-
-    this.$children = {
-      TodoAppender: {
-        constructor: TodoAppender,
-        props: {
-          appendItem: this.appendItem.bind(this)
-        }
-      },
-      TodoList: {
-        constructor: TodoList,
-        props: {
-          removeItem: this.removeItem.bind(this),
-          toggleItem: this.toggleItem.bind(this),
-          updateItem: this.updateItem.bind(this),
-          selectPriority: this.selectPriority.bind(this),
-          editingItem: this.editingItem.bind(this),
-          get loading () { return todoStore.$state.loading },
-          get editingIndex () { return todoStore.$state.editingIndex },
-          get items () { return todoStore.$getters.filteredItems }
-        }
-      },
-      TodoFooter: {
-        constructor: TodoFooter,
-        props: {
-          filterItem: this.filterItem.bind(this),
-          removeAll: this.removeAll.bind(this),
-          get itemCount () { return todoStore.$getters.filteredItems.length },
-          get filterType () { return todoStore.$state.filterType },
-        }
-      },
-    }
-  }
+  $children = () => ({
+    TodoAppender: {
+      constructor: TodoAppender,
+      props: {
+        appendItem: this.appendItem
+      }
+    },
+    TodoList: {
+      constructor: TodoList,
+      props: {
+        removeItem: this.removeItem,
+        toggleItem: this.toggleItem,
+        updateItem: this.updateItem,
+        selectPriority: this.selectPriority,
+        editPriority: this.editPriority,
+        editingItem: this.editingItem,
+        get loading () { return todoStore.$state.loading },
+        get editingIndex () { return todoStore.$state.editingIndex },
+        get items () { return todoStore.$getters.filteredItems }
+      }
+    },
+    TodoFooter: {
+      constructor: TodoFooter,
+      props: {
+        filterItem: this.filterItem,
+        removeAll: this.removeAll,
+        get itemCount () { return todoStore.$getters.filteredItems.length },
+        get filterType () { return todoStore.$state.filterType },
+      }
+    },
+  });
 
   template () {
     return `
