@@ -1,4 +1,4 @@
-import {addEventBubblingListener, debounceOneFrame} from "../utils/index.js";
+import {addEventBubblingListener} from "../utils/index.js";
 import {observable, observe} from "./Observer.js";
 
 export const Component = class {
