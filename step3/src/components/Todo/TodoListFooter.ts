@@ -1,4 +1,4 @@
-import {Component} from "@/core";
+import {Component} from "@/_core";
 import {FilterTypes} from "@/constants";
 import {todoOfTeamStore, SET_FILTER_TYPE, DELETE_ALL_ITEM, teamStore} from "@/store";
 
@@ -22,10 +22,6 @@ export const TodoListFooter = class extends Component<{ id: string }> {
   private get filteredCount () {
     const memberOfItem: Record<string, any> = todoOfTeamStore.$getters.membersByFilteredTodoList;
     return memberOfItem[this.id].length;
-  }
-
-  protected componentInit() {
-    this.$stores = [ teamStore ];
   }
 
   protected template () {

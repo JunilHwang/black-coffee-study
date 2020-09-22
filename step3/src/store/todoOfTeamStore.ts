@@ -1,4 +1,4 @@
-import {Store} from "@/core";
+import {Store, observable} from "@/_core";
 import {TeamService, TodoService} from "@/services";
 import {FilterTypes} from "@/constants";
 import {TodoItem, TodoMember, TodoTeam} from "@/domains";
@@ -19,6 +19,7 @@ export const UPDATE_ITEM = 'UPDATE_ITEM';
 export const UPDATE_ITEM_PRIORITY = 'UPDATE_ITEM_PRIORITY';
 export const DELETE_ITEM = 'DELETE_ITEM';
 export const DELETE_ALL_ITEM = 'DELETE_ALL_ITEM';
+export const DELETE_TEAM_MEMBER = 'DELETE_TEAM_MEMBER';
 
 interface TodoOfTeamState {
   _id: string;
@@ -44,13 +45,17 @@ export const todoOfTeamStore = new Store<TodoOfTeamState>({
     [INIT] (state, { _id, name, members }: TodoTeam) {
       state._id = _id;
       state.name = name;
+      const memberMap: Record<string, TodoMember> = {};
+      const filterMap: Record<string, FilterTypes> = {};
       for (const member of members) {
-        state.members[member._id] = {
+        memberMap[member._id] = {
           ...member,
           todoList: (member.todoList || []).filter(v => v !== null)
         };
-        state.filterType[member._id] = FilterTypes.ALL;
+        filterMap[member._id] = FilterTypes.ALL;
       }
+      state.members = observable(memberMap);
+      state.filterType = observable(filterMap);
     },
     [SET_TODO_LIST] (state, { memberId, todoList }: { memberId: string, todoList: TodoItem[] }) {
       state.members[memberId].todoList = todoList;
@@ -72,15 +77,15 @@ export const todoOfTeamStore = new Store<TodoOfTeamState>({
             .reduce((temp, [ id, { todoList } ]) => ({
               ...temp,
               [id]: todoList.filter(({ isCompleted }) => (filterType[id] === FilterTypes.ALL) ||
-                                                         (filterType[id] === FilterTypes.PRIORITY) ||
-                                                         (filterType[id] === FilterTypes.COMPLETED && isCompleted) ||
-                                                         (filterType[id] === FilterTypes.ACTIVE && !isCompleted))
+                                                                  (filterType[id] === FilterTypes.PRIORITY) ||
+                                                                  (filterType[id] === FilterTypes.COMPLETED && isCompleted) ||
+                                                                  (filterType[id] === FilterTypes.ACTIVE && !isCompleted))
             }), {}),
   },
 
   actions: {
-    async [FETCH_TEAM] ({ commit }, id) {
-      commit(INIT, await TeamService.fetchTeam(id));
+    async [FETCH_TEAM] ({ commit }, teamId) {
+      commit(INIT, await TeamService.fetchTeam(teamId));
     },
 
     async [FETCH_TODO_LIST] ({ commit, state: { _id: teamId } }, memberId: string) {
@@ -121,6 +126,12 @@ export const todoOfTeamStore = new Store<TodoOfTeamState>({
     async [ADD_TEAM_MEMBER] ({ commit, state: { _id: teamId } }, name: string) {
       return commit(INIT, await TeamService.addTeamMember(teamId, name));
     },
+
+    async [DELETE_TEAM_MEMBER] ({ dispatch, state: { _id: teamId } }, memberId: string) {
+      await TeamService.deleteTeamMember(teamId, memberId)
+      return dispatch(FETCH_TEAM, teamId);
+    },
+
   },
 
 });
