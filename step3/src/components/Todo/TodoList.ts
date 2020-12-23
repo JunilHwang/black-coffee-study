@@ -105,7 +105,10 @@ export const TodoList = class extends Component<{  id: string }> {
                           <option value="${PriorityTypes.FIRST}">1순위</option>
                           <option value="${PriorityTypes.SECOND}">2순위</option>
                         </select>` : `
-                        <span class="chip ${getPriorityChip(priority)}">${priority}순위</span>                        
+                        <span class="chip ${getPriorityChip(priority)}">
+                          ${priority === PriorityTypes.FIRST ? 1 : 2}
+                          순위
+                        </span>                        
                       `}
                     </div>
                     ${contents}

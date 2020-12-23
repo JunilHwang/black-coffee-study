@@ -48,7 +48,7 @@ export const teamStore = new Store<TeamState>({
     async [REMOVE_TEAM] ({ dispatch }, teamId: string) {
       await TeamService.deleteTeam(teamId);
       alert('삭제되었습니다.');
-      todoRouter.push('./');
+      todoRouter.push('/');
     },
 
   },

@@ -32,7 +32,7 @@ export const TeamList = class extends Component {
     this.addEvent('view', 'click', event => {
       event.preventDefault();
       const id = selectParent('[data-id]', event.target).dataset.id as string;
-      todoRouter.push(`./kanban.html?id=${id}`);
+      todoRouter.push(`/kanban?id=${id}`);
     })
 
     this.addEvent( 'add', 'click', () => {
