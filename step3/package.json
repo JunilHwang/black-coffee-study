@@ -6,9 +6,10 @@
   "author": "junil.h <tjsdlf4261@naver.com>",
   "license": "MIT",
   "scripts": {
-    "watch": "webpack --watch --mode=development && live-server",
+    "watch": "webpack --watch --mode=development",
     "build:dev": "webpack --mode=development",
-    "build": "webpack --mode=production"
+    "build": "webpack --mode=production",
+    "dev": "live-server"
   },
   "dependencies": {
     "typescript": "^4.0.2"
