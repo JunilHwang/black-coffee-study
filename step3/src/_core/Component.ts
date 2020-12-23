@@ -30,9 +30,13 @@ export class Component<Props = {}, State extends Record<string, any> = {} > {
 
   private buildChildren () {
     selectAllElement('[data-component]', this.$target).forEach(target => {
-      const componentName = target.dataset.component as string;
-      const { constructor, props } = this.$children[componentName];
-      new constructor(target, props);
+      try {
+        const componentName = target.dataset.component as string;
+        const {constructor, props} = this.$children[componentName];
+        new constructor(target, props);
+      } catch (e) {
+        console.log(target);
+      }
     })
   }
 
@@ -60,8 +64,12 @@ export class Component<Props = {}, State extends Record<string, any> = {} > {
   }
 
   public render = () => {
-    this.$target.innerHTML = this.template();
-    this.buildChildren();
+    try {
+      this.$target.innerHTML = this.template();
+      this.buildChildren();
+    } catch (e) {
+      this.$target.innerHTML = '';
+    }
     this.componentDidMount();
   };
 
